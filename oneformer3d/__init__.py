@@ -21,3 +21,4 @@ from .scannet_dataset import ScanNetSegDataset_, ScanNet200SegDataset_
 from .s3dis_dataset import S3DISSegDataset_
 from .structured3d_dataset import Structured3DSegDataset, ConcatDataset_
 from .structures import InstanceData_
+from .local_instance_visualizer import Det3dInstanceVisualizer

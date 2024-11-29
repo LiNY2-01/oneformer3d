@@ -59,8 +59,8 @@ model = dict(
             fix_mean_loss=True)),
     train_cfg=dict(),
     test_cfg=dict(
-        topk_insts=450,
-        inst_score_thr=0.0,
+        topk_insts=100,
+        inst_score_thr=0.1,
         pan_score_thr=0.4,
         npoint_thr=300,
         obj_normalization=True,
@@ -99,7 +99,7 @@ train_pipeline = [
         with_seg_3d=True),
     dict(
         type='PointSample_',
-        num_points=180000),
+        num_points=100000),
     dict(type='PointInstClassMapping_',
         num_classes=num_instance_classes),
     dict(
@@ -207,6 +207,7 @@ val_evaluator = dict(
     submission_prefix_instance=None,
     metric_meta=metric_meta)
 test_evaluator = val_evaluator
+eval_dataloader = test_dataloader
 
 optim_wrapper = dict(
     type='OptimWrapper',
@@ -220,7 +221,12 @@ default_hooks = dict(
         interval=16,
         max_keep_ckpts=1,
         save_best=['all_ap_50%', 'miou'],
-        rule='greater'))
+        rule='greater'),
+
+)
+vis_backends = [dict(type='LocalVisBackend')]
+visualizer = dict(
+    type='Det3dInstanceVisualizer', vis_backends=vis_backends, name='visualizer')
 
 load_from = 'work_dirs/tmp/instance-only-oneformer3d_1xb2_scannet-and-structured3d.pth'
 
