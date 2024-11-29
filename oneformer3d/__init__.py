@@ -22,3 +22,6 @@ from .s3dis_dataset import S3DISSegDataset_
 from .structured3d_dataset import Structured3DSegDataset, ConcatDataset_
 from .structures import InstanceData_
 from .local_instance_visualizer import Det3dInstanceVisualizer
+from .lidar_seg3d_inferencer import OneformerSeg3DInferencer
+from .superpoint_process import ExtractSuperPointAnnotations
+
