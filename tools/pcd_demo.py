@@ -42,7 +42,7 @@ def parse_args():
     parser.add_argument(
         '--vis-task',
         type=str,
-        default='lidar_sem_seg',
+        default='lidar_seg',
         choices=[
             'mono_det', 'multi-view_det', 'lidar_det', 'lidar_seg',
             'multi-modality_det','lidar_sem_seg'

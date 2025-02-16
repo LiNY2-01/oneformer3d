@@ -77,9 +77,10 @@ class NormalizePointsColor_(NormalizePointsColor):
             Default value is from SPFormer preprocessing.
     """
 
-    def __init__(self, color_mean, color_std=127.5):
+    def __init__(self, color_mean, color_std=127.5,no_color=False):
         self.color_mean = color_mean
         self.color_std = color_std
+        self.nocolor=no_color
 
     def transform(self, input_dict):
         """Call function to normalize color of points.
@@ -102,5 +103,7 @@ class NormalizePointsColor_(NormalizePointsColor):
         if self.color_std is not None:
             points.color = points.color / \
                 points.color.new_tensor(self.color_std)
+        if self.nocolor:
+            points.color = points.color * 0.0
         input_dict['points'] = points
         return input_dict

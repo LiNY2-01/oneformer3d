@@ -27,6 +27,7 @@ from mmdet3d.visualization import Det3DLocalVisualizer
 from mmdet3d.visualization import (write_obj)
 import colorsys
 import random
+import os.path as osp
 
 try:
     import open3d as o3d
@@ -103,7 +104,7 @@ class Det3dInstanceVisualizer(Det3DLocalVisualizer):
 
         pts_ins_seg = np.zeros((points.shape[0], ), dtype=np.uint8)
 
-        for instance_id, instance in enumerate(instance_indices):
+        for instance_id, instance in reversed(list(enumerate(instance_indices))):
             pts_ins_seg[instance] = instance_id
 
         pts_color = palette[pts_ins_seg]
@@ -194,6 +195,28 @@ class Det3dInstanceVisualizer(Det3DLocalVisualizer):
         classes = self.dataset_meta.get('classes', None)
         # For object detection datasets, no palette is saved
         palette = self.dataset_meta.get('palette', None)
+
+        if self.dataset_meta.get('dataset') == 'scannet200':
+
+            palette = [ (0,0,0) for i in range(200)]
+
+
+            vis_class_palette = {
+                'wall': (0, 255, 255), 
+                'floor':(0, 0, 255),
+                'door':(200, 200, 100),
+                'ceiling': (0, 255, 0 ),
+                'window': (100, 100, 255),
+                'doorframe':(170, 120, 200),
+            }
+            vis_class_id = [classes.index(cls) for cls in vis_class_palette.keys()]
+            
+            for i in vis_class_id:
+                palette[i] = vis_class_palette[classes[i]]
+
+    
+        
+        
         ignore_index = self.dataset_meta.get('ignore_index', None)
 
         gt_data_3d = None
@@ -233,7 +256,11 @@ class Det3dInstanceVisualizer(Det3DLocalVisualizer):
 
 
         if o3d_save_path is not None:
-            out_file = o3d_save_path.split('.')[0] + f'_{name}.pcd'
+            out_file = osp.join(
+                osp.splitext(osp.dirname(o3d_save_path))[0], 
+                f'{osp.splitext(osp.basename(name))[0]}.pcd'
+            )
+            # out_file = o3d_save_path.split('.')[0] + f'
             
             o3d.io.write_point_cloud(out_file, self.pcd)
             # out_file = o3d_save_path.split('.')[0] + f'_{name}.ply'
@@ -261,9 +288,9 @@ class Det3dInstanceVisualizer(Det3DLocalVisualizer):
     def _jitter(color):
         hsv_color = colorsys.rgb_to_hsv(color[0] / 255.0, color[1] / 255.0 , color[2] / 255.0)
         jitter_color = [hsv_color[0], hsv_color[1], hsv_color[2]]
-        # jitter_color[0] += random.uniform(-0.1, 0.1)
-        jitter_color[1] += random.uniform(-0.1, 0.1)
-        jitter_color[2] += random.uniform(-0.1, 0.1)
+        jitter_color[0] += random.uniform(-0.02, 0.02)
+        jitter_color[1] += random.uniform(-0.15, 0.15)
+        jitter_color[2] += random.uniform(-0.15, 0.15)
         jitter_color = np.clip(jitter_color, 0, 1)
         res = colorsys.hsv_to_rgb(jitter_color[0], jitter_color[1], jitter_color[2])
         return [res[0] * 255, res[1] * 255, res[2] * 255]
