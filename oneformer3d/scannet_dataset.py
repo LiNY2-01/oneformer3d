@@ -99,4 +99,8 @@ class ScanNet200SegDataset_(ScanNetSegDataset_):
         1176, 1178, 1179, 1180, 1181, 1182, 1183, 1184, 1185, 1186, 1187, 1188,
         1189, 1190, 1191),
     'seg_all_class_ids': tuple(range(1, 1358)),
-    'palette': [random.sample(range(0, 255), 3) for i in range(200)]}
+    # 'palette': [random.sample(range(0, 255), 3) for i in range(200)]}
+    'palette': [ (0,0,0) for i in range(200)]}
+
+  
+

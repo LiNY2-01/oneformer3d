@@ -141,7 +141,7 @@ train_pipeline = [
         shift_height=False,
         use_color=True,
         load_dim=6,
-        use_dim=[0, 1, 2, 3, 4, 5]),
+        use_dim=[0, 1, 2, 3 , 4, 5]),
     dict(
         type='LoadAnnotations3D_',
         with_bbox_3d=False,
@@ -164,8 +164,9 @@ train_pipeline = [
         shift_height=False),
     dict(
         type='NormalizePointsColor_',
-        color_mean=color_mean,
-        color_std=color_std),
+        color_mean=None,
+        color_std=None,
+        no_color=True,),
     dict(
         type='AddSuperPointAnnotations',
         num_classes=num_semantic_classes,
@@ -210,7 +211,8 @@ test_pipeline = [
             dict(
                 type='NormalizePointsColor_',
                 color_mean=color_mean,
-                color_std=color_std),
+                color_std=color_std,
+                no_color=True),
             dict(
                 type='AddSuperPointAnnotations',
                 num_classes=num_semantic_classes,
@@ -236,7 +238,8 @@ eval_pipeline = [
         transforms=[
             dict(
                 type='NormalizePointsColor_',
-                color_mean=[127.5, 127.5, 127.5]),
+                color_mean=[127.5, 127.5, 127.5],
+                no_color=True),
             dict(
                 type='ExtractSuperPointAnnotations',
                 num_classes=num_semantic_classes,
@@ -336,7 +339,7 @@ vis_backends = [dict(type='LocalVisBackend')]
 visualizer = dict(
     type='Det3dInstanceVisualizer', vis_backends=vis_backends, name='visualizer')
 
-load_from = 'work_dirs/tmp/mask3d_scannet200.pth'
+load_from = 'work_dirs/oneformer3d_1xb4_scannet200_no_color/best_miou_epoch_448.pth'
 
 train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=512, val_interval=16)
 val_cfg = dict(type='ValLoop')

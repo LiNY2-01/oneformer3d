@@ -17,3 +17,16 @@ class S3DISSegDataset_(S3DISDataset):
         'seg_all_class_ids':
         tuple(range(14))  # possibly with 'stair' class
     }
+
+@DATASETS.register_module()
+class S3DISSimpleSegDataset_(S3DISDataset):
+    METAINFO = {
+        'classes':
+        ('ceiling', 'floor', 'wall', 'window', 'door', 'clutter'),
+        'palette': [[0, 255, 0], [0, 0, 255], [0, 255, 255], [100, 100, 255], [200, 200, 100],
+                    [50, 50, 50]],
+        'seg_valid_class_ids':
+        tuple(range(6)),
+        'seg_all_class_ids':
+        tuple(range(7))  # possibly with 'stair' class
+    }
