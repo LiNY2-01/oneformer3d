@@ -47,7 +47,7 @@ if __name__ == '__main__':
     from mmdet3d.utils import register_all_modules
     register_all_modules()
 
-    if args.dataset in ('scannet', 'scannet200'):
+    if args.dataset in ('scannet', 'scannet200','matterport3d'):
         scannet_data_prep(
             root_path=args.root_path,
             info_prefix=args.extra_tag,

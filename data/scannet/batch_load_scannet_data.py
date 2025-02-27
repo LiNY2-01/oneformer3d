@@ -51,6 +51,7 @@ def export_one_scan(scan_name,
             mesh_file, agg_file, seg_file, meta_file, label_map_file, None,
             test_mode, scannet200)
 
+    #MASK OUT DONOTCARE CLASS
     if not test_mode:
         mask = np.logical_not(np.in1d(semantic_labels, DONOTCARE_CLASS_IDS))
         mesh_vertices = mesh_vertices[mask, :]
@@ -71,6 +72,7 @@ def export_one_scan(scan_name,
         assert unaligned_bboxes.shape[0] == aligned_bboxes.shape[0]
         print(f'Num of care instances: {unaligned_bboxes.shape[0]}')
 
+    # Subsample the points
     if max_num_point is not None:
         max_num_point = int(max_num_point)
         N = mesh_vertices.shape[0]

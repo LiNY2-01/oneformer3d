@@ -5,7 +5,7 @@ import os
 import mmengine
 
 from scannet_data_utils import ScanNetData
-
+from mp3d_data_utils import Matterport3DData
 
 def create_indoor_info_file(data_path,
                             pkl_prefix='sunrgbd',
@@ -25,7 +25,7 @@ def create_indoor_info_file(data_path,
         workers (int, optional): Number of threads to be used. Default: 4.
     """
     assert os.path.exists(data_path)
-    assert pkl_prefix in ['scannet', 'scannet200'], \
+    assert pkl_prefix in ['scannet', 'scannet200','matterport3d'], \
         f'unsupported indoor dataset {pkl_prefix}'
     save_path = data_path if save_path is None else save_path
     assert os.path.exists(save_path)
@@ -42,6 +42,10 @@ def create_indoor_info_file(data_path,
         train_dataset = ScanNetData(root_path=data_path, split='train')
         val_dataset = ScanNetData(root_path=data_path, split='val')
         test_dataset = ScanNetData(root_path=data_path, split='test')
+    elif pkl_prefix == "matterport3d":
+        train_dataset = Matterport3DData(root_path=data_path, split='train')
+        val_dataset = Matterport3DData(root_path=data_path, split='val')
+        test_dataset = Matterport3DData(root_path=data_path, split='test')
     else:  # ScanNet200
         # ScanNet has a train-val-test split
         train_dataset = ScanNetData(root_path=data_path, split='train',

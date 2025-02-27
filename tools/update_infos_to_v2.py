@@ -380,6 +380,111 @@ def update_scannet200_infos(pkl_path, out_dir):
 
     mmengine.dump(converted_data_info, out_path, 'pkl')
 
+
+def update_matterport3d_infos(pkl_path, out_dir):
+    print(f"{pkl_path} will be modified.")
+    if out_dir in pkl_path:
+        print(f"Warning, you may overwriting " f"the original data {pkl_path}.")
+        time.sleep(5)
+    METAINFO = {
+        "classes": (
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "ceiling",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub",
+            "other",
+        )
+    }
+    print(f"Reading from input file: {pkl_path}.")
+    data_list = mmengine.load(pkl_path)
+    print("Start updating:")
+    converted_list = []
+    for ori_info_dict in mmengine.track_iter_progress(data_list):
+        temp_data_info = get_empty_standard_data_info()
+        temp_data_info["lidar_points"]["num_pts_feats"] = ori_info_dict["point_cloud"][
+            "num_features"
+        ]
+        temp_data_info["lidar_points"]["lidar_path"] = Path(
+            ori_info_dict["pts_path"]
+        ).name
+        if "pts_semantic_mask_path" in ori_info_dict:
+            temp_data_info["pts_semantic_mask_path"] = Path(
+                ori_info_dict["pts_semantic_mask_path"]
+            ).name
+        if "pts_instance_mask_path" in ori_info_dict:
+            temp_data_info["pts_instance_mask_path"] = Path(
+                ori_info_dict["pts_instance_mask_path"]
+            ).name
+        if "super_pts_path" in ori_info_dict:
+            temp_data_info["super_pts_path"] = Path(
+                ori_info_dict["super_pts_path"]
+            ).name
+
+        # TODO support camera
+        # np.linalg.inv(info['axis_align_matrix'] @ extrinsic): depth2cam
+        anns = ori_info_dict.get("annos", None)
+        ignore_class_name = set()
+        if anns is not None:
+            # temp_data_info["axis_align_matrix"] = anns["axis_align_matrix"].tolist()
+            if anns["gt_num"] == 0:
+                instance_list = []
+            else:
+                num_instances = len(anns["name"])
+                instance_list = []
+                for instance_id in range(num_instances):
+                    empty_instance = get_empty_instance()
+                    empty_instance["bbox_3d"] = anns["gt_boxes_upright_depth"][
+                        instance_id
+                    ].tolist()
+
+                    if anns["name"][instance_id] in METAINFO["classes"]:
+                        empty_instance["bbox_label_3d"] = METAINFO["classes"].index(
+                            anns["name"][instance_id]
+                        )
+                    else:
+                        ignore_class_name.add(anns["name"][instance_id])
+                        empty_instance["bbox_label_3d"] = -1
+
+                    empty_instance = clear_instance_unused_keys(empty_instance)
+                    instance_list.append(empty_instance)
+            temp_data_info["instances"] = instance_list
+        temp_data_info, _ = clear_data_info_unused_keys(temp_data_info)
+        converted_list.append(temp_data_info)
+    pkl_name = Path(pkl_path).name
+    out_path = osp.join(out_dir, pkl_name)
+    print(f"Writing to output file: {out_path}.")
+    print(f"ignore classes: {ignore_class_name}")
+
+    # dataset metainfo
+    metainfo = dict()
+    metainfo["categories"] = {k: i for i, k in enumerate(METAINFO["classes"])}
+    if ignore_class_name:
+        for ignore_class in ignore_class_name:
+            metainfo["categories"][ignore_class] = -1
+    metainfo["dataset"] = "scannet"
+    metainfo["info_version"] = "1.1"
+
+    converted_data_info = dict(metainfo=metainfo, data_list=converted_list)
+
+    mmengine.dump(converted_data_info, out_path, "pkl")
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Arg parser for data coords '
                                      'update due to coords sys refactor.')
@@ -405,6 +510,9 @@ def update_pkl_infos(dataset, out_dir, pkl_path):
         update_scannet_infos(pkl_path=pkl_path, out_dir=out_dir)
     elif dataset.lower() == 'scannet200':
         update_scannet200_infos(pkl_path=pkl_path, out_dir=out_dir)
+    elif dataset.lower() == 'matterport3d':
+        update_matterport3d_infos(pkl_path=pkl_path, out_dir=out_dir)
+    
     else:
         raise NotImplementedError(f'Do not support convert {dataset} to v2.')
 

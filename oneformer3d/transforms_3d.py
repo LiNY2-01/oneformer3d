@@ -261,7 +261,7 @@ class PointInstClassMapping_(BaseTransform):
             are updated in the result dict. 'gt_labels_3d' is added.
         """
 
-        # because pts_instance_mask contains instances from non-instaces 
+        # because pts_instance_mask contains instances from non-instaces
         # classes
         pts_instance_mask = np.array(input_dict['pts_instance_mask'])
         pts_semantic_mask = input_dict['pts_semantic_mask']
@@ -273,7 +273,7 @@ class PointInstClassMapping_(BaseTransform):
             # floor as one instance
             pts_instance_mask[pts_semantic_mask == 1] = \
                 pts_instance_mask.max() + 1
-        
+
         pts_instance_mask[pts_semantic_mask == self.num_classes] = -1
         pts_semantic_mask[pts_semantic_mask == self.num_classes] = -1
 
@@ -289,6 +289,72 @@ class PointInstClassMapping_(BaseTransform):
 
         input_dict['pts_instance_mask'] = pts_instance_mask
         input_dict['pts_semantic_mask'] = pts_semantic_mask
+
+        gt_labels = np.zeros(len(new_idxs), dtype=int)
+        for inst in new_idxs:
+            gt_labels[inst] = pts_semantic_mask[pts_instance_mask == inst][0]
+
+        input_dict['gt_labels_3d'] = gt_labels
+
+        return input_dict
+
+
+@TRANSFORMS.register_module()
+class PointInstClassMappingMp3d_(BaseTransform):
+    """Delete instances from non-instaces classes.
+
+    Required Keys:
+    - pts_instance_mask (np.float32)
+    - pts_semantic_mask (np.float32)
+
+    Modified Keys:
+    - pts_instance_mask (np.float32)
+    - pts_semantic_mask (np.float32)
+
+    Added Keys:
+    - gt_labels_3d (int)
+
+    Args:
+        num_classes (int): Number of classes.
+    """
+
+    def __init__(self, ):
+        pass
+        # self.num_classes = num_classes
+        # self.structured3d = structured3d
+
+    def transform(self, input_dict):
+        """Private function for deleting
+            instances from non-instaces classes.
+
+        Args:
+            input_dict (dict): Result dict from loading pipeline.
+
+        Returns:
+            dict: results, 'pts_instance_mask', 'pts_semantic_mask',
+            are updated in the result dict. 'gt_labels_3d' is added.
+        """
+
+        # because pts_instance_mask contains instances from non-instaces
+        # classes
+        pts_instance_mask = np.array(input_dict["pts_instance_mask"])
+        pts_semantic_mask = input_dict["pts_semantic_mask"]
+        pts_instance_mask -= 1
+
+        # pts_semantic_mask[ pts_semantic_mask == -1 ] = 19
+
+        input_dict["pts_instance_mask"] = pts_instance_mask
+        input_dict["pts_semantic_mask"] = pts_semantic_mask
+
+        idxs = np.unique(pts_instance_mask)
+        mapping = np.zeros(np.max(idxs) + 2, dtype=int)
+        new_idxs = np.arange(len(idxs))
+        if idxs[0] == -1:
+            mapping[idxs] = new_idxs - 1
+            new_idxs = new_idxs[:-1]
+        else:
+            mapping[idxs] = new_idxs
+        pts_instance_mask = mapping[pts_instance_mask]
 
         gt_labels = np.zeros(len(new_idxs), dtype=int)
         for inst in new_idxs:
@@ -364,7 +430,7 @@ class PointSample_(PointSample):
                 sp_pts_mask, return_inverse=True)[1]
             input_dict['sp_pts_mask'] = sp_pts_mask
         return input_dict
-    
+
 @TRANSFORMS.register_module()
 class SkipEmptyScene(BaseTransform):
     """Skip empty scene during training.

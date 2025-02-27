@@ -166,8 +166,8 @@ test_pipeline = [
 
 # run settings
 train_dataloader = dict(
-    batch_size=4,
-    num_workers=6,
+    batch_size=8,
+    num_workers=10,
     dataset=dict(
         type=dataset_type,
         ann_file='scannet_oneformer3d_infos_train.pkl',
@@ -229,6 +229,7 @@ load_from = 'work_dirs/tmp/sstnet_scannet.pth'
 train_cfg = dict(
     type='EpochBasedTrainLoop',
     max_epochs=512,
-    dynamic_intervals=[(1, 16), (512 - 16, 1)])
+    val_interval=1)
+    # dynamic_intervals=[(1, 16), (512 - 16, 1)])
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')

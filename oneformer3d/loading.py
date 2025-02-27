@@ -16,8 +16,9 @@ class LoadAnnotations3D_(LoadAnnotations3D):
         with_sp_mask_3d (bool): Whether to load super point maks. 
     """
 
-    def __init__(self, with_sp_mask_3d, **kwargs):
+    def __init__(self, with_sp_mask_3d, with_bbox_label_3d=False, **kwargs):
         self.with_sp_mask_3d = with_sp_mask_3d
+        self.with_bbox_label_3d = with_bbox_label_3d
         super().__init__(**kwargs)
 
     def _load_sp_pts_3d(self, results):

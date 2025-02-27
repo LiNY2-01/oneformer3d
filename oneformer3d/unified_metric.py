@@ -85,8 +85,11 @@ class UnifiedSegMetric(SegMetric):
         pred_masks_pan = []
 
         for eval_ann, single_pred_results in results:
-            
-            if self.metric_meta['dataset_name'] == 'S3DIS':
+
+            if (
+                self.metric_meta["dataset_name"] == "S3DIS"
+                or self.metric_meta["dataset_name"] == "Matterport3D"
+            ):
                 pan_gt = {}
                 pan_gt['pts_semantic_mask'] = eval_ann['pts_semantic_mask']
                 pan_gt['pts_instance_mask'] = \
@@ -103,7 +106,7 @@ class UnifiedSegMetric(SegMetric):
                 gt_masks_pan.append(pan_gt)
             else:
                 gt_masks_pan.append(eval_ann)
-            
+
             pred_masks_pan.append({
                 'pts_instance_mask': \
                     single_pred_results['pts_instance_mask'][1],
@@ -115,7 +118,10 @@ class UnifiedSegMetric(SegMetric):
             pred_semantic_masks_sem_task.append(
                 single_pred_results['pts_semantic_mask'][0])
 
-            if self.metric_meta['dataset_name'] == 'S3DIS':
+            if (
+                self.metric_meta["dataset_name"] == "S3DIS"
+                # or self.metric_meta["dataset_name"] == "Matterport3D"
+            ):
                 gt_semantic_masks_inst_task.append(eval_ann['pts_semantic_mask'])
                 gt_instance_masks_inst_task.append(eval_ann['pts_instance_mask'])  
             else:
@@ -126,7 +132,7 @@ class UnifiedSegMetric(SegMetric):
                     num_stuff_cls)
                 gt_semantic_masks_inst_task.append(sem_mask)
                 gt_instance_masks_inst_task.append(inst_mask)           
-            
+
             pred_instance_masks_inst_task.append(
                 torch.tensor(single_pred_results['pts_instance_mask'][0]))
             pred_instance_labels.append(
@@ -146,7 +152,10 @@ class UnifiedSegMetric(SegMetric):
             ignore_index[0],
             logger=logger)
 
-        if self.metric_meta['dataset_name'] == 'S3DIS':
+        if (
+            self.metric_meta["dataset_name"] == "S3DIS"
+            or self.metric_meta["dataset_name"] == "Matterport3D"
+        ):
             # :-1 for unlabeled
             ret_inst = instance_seg_eval(
                 gt_semantic_masks_inst_task,
@@ -200,7 +209,7 @@ class UnifiedSegMetric(SegMetric):
 
         mapping = np.array(list(valid_class_ids) + [-1])
         pts_semantic_mask = mapping[pts_semantic_mask]
-        
+
         return pts_semantic_mask, pts_instance_mask
 
 

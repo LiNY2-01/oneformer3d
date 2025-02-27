@@ -25,4 +25,5 @@ from .local_instance_visualizer import Det3dInstanceVisualizer
 from .lidar_seg3d_inferencer import OneformerSeg3DInferencer
 from .superpoint_process import ExtractSuperPointAnnotations
 from .spt import data, transforms, utils
+from .mp3d_dataset import Matterport3DDataset
 

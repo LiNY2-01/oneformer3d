@@ -731,11 +731,13 @@ class S3DISOneFormer3D(Base3DDetector):
                                 self.get_gt_semantic_masks(sem_mask,
                                                             voxel_superpoints,
                                                             self.num_classes)
-            batch_data_samples[i].gt_instances_3d.sp_inst_masks = \
-                                self.get_gt_inst_masks(inst_mask,
-                                                       voxel_superpoints)
+            batch_data_samples[i].gt_instances_3d.sp_inst_masks = (
+                self.get_gt_inst_masks(
+                    inst_mask, voxel_superpoints,
+                )
+            )
+            del voxel_superpoints
             sp_gt_instances.append(batch_data_samples[i].gt_instances_3d)
-
         loss = self.criterion(x, sp_gt_instances)
         return loss
 
@@ -838,7 +840,7 @@ class S3DISOneFormer3D(Base3DDetector):
             device=scores.device).unsqueeze(0).repeat(
                 self.decoder.num_queries - self.test_cfg.num_sem_cls,
                 1).flatten(0, 1)
-        
+
         scores, topk_idx = scores.flatten(0, 1).topk(
             self.test_cfg.topk_insts, sorted=False)
         labels = labels[topk_idx]
@@ -875,7 +877,7 @@ class S3DISOneFormer3D(Base3DDetector):
         mask_pred = mask_pred[npoint_mask]
 
         return mask_pred, labels, scores
-   
+
     def pred_sem(self, pred_masks, superpoints):
         """Predict semantic masks for a single scene.
 
@@ -917,11 +919,11 @@ class S3DISOneFormer3D(Base3DDetector):
         mask_pred, labels, scores = self.pred_inst(
             pred_masks[:-n_cls, :], pred_scores[:-n_cls, :],
             pred_labels[:-n_cls, :], superpoints, thr)
-        
+
         thing_idxs = torch.zeros_like(labels)
         for thing_cls in self.test_cfg.thing_cls:
             thing_idxs = thing_idxs.logical_or(labels == thing_cls)
-        
+
         mask_pred = mask_pred[thing_idxs]
         scores = scores[thing_idxs]
         labels = labels[thing_idxs]
@@ -948,7 +950,7 @@ class S3DISOneFormer3D(Base3DDetector):
             things_inst_mask, return_inverse=True)[1]
         things_inst_mask[things_inst_mask != 0] += len(stuff_cls) - 1
         things_sem_mask[things_inst_mask == 0] = 0
-      
+
         sem_map_src_mapping[things_inst_mask != 0] = 0
         sem_map[things_inst_mask != 0] = 0
         sem_map += things_inst_mask
@@ -980,7 +982,7 @@ class S3DISOneFormer3D(Base3DDetector):
         return sp_masks
 
     @staticmethod
-    def get_gt_inst_masks(mask_src, sp_pts_mask):
+    def get_gt_inst_masks(mask_src, sp_pts_mask,debug_data=None):
         """Create ground truth instance masks.
         
         Args:
@@ -998,6 +1000,16 @@ class S3DISOneFormer3D(Base3DDetector):
             mask = torch.nn.functional.one_hot(mask)
 
         mask = mask.T
+
+        if debug_data is not None:
+            label_3d = debug_data.gt_instances_3d.labels_3d
+            label_3d_expand = label_3d.unsqueeze(-1)
+            ins_label = mask * label_3d_expand
+            ins_label = ins_label.sum(0)
+            sem_mask = debug_data.gt_pts_seg.pts_semantic_mask
+            if not torch.equal(ins_label, sem_mask):
+                print("ins label error!")
+
         sp_masks = scatter_mean(mask, sp_pts_mask, dim=-1)
         sp_masks = sp_masks > 0.5
 
