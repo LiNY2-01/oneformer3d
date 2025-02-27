@@ -1,6 +1,7 @@
-data
+/data
 work_dirs
 .vscode
+.idea
 __pycache__/
 *.py[cod]
 *$py.class

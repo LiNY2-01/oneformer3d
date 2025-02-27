@@ -1,20 +1,13 @@
-
-import numpy as np
-import scipy
 import torch
-from torch_scatter import scatter_mean
 from mmcv.transforms import BaseTransform
-from mmdet3d.datasets.transforms import PointSample
-import open3d as o3d
 from mmdet3d.registry import TRANSFORMS
-import segmentator
 
 from oneformer3d.spt.transforms import PointFeatures, GroundElevation, AdjacencyGraph, ConnectIsolated, AddKeysTo, \
     CutPursuitPartition
 from oneformer3d.spt.transforms.device import DataTo
 from oneformer3d.spt.transforms.neighbors import KNN
 from oneformer3d.spt.transforms.sampling import GridSampling3D
-from oneformer3d.spt.data import Data,NAG
+from oneformer3d.spt.data import Data
 from oneformer3d.spt.transforms import SaveNodeIndex
 
 @TRANSFORMS.register_module()
