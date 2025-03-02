@@ -50,6 +50,11 @@ RUN git clone https://github.com/Karbo123/segmentator.git \
     && make install \
     && cd ../../..
 
+# 安装项目中dependencies文件夹下的包
+COPY dependencies/ /dependencies/
+
+
+
 # Install remaining python packages
 RUN pip install --no-deps  --retries 5 \
     spconv-cu117==2.3.6 \
