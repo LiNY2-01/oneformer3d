@@ -201,7 +201,8 @@ class OneformerSeg3DInferencer(Base3DInferencer):
             o3d_save_path = (
                 osp.join(img_out_dir, pc_name) if img_out_dir != "" else None
             )
-            mmengine.mkdir_or_exist(osp.dirname(o3d_save_path))
+            if o3d_save_path is not None:
+                mmengine.mkdir_or_exist(osp.dirname(o3d_save_path))
 
             data_input = dict(points=points)
             self.visualizer.add_datasample(
@@ -216,7 +217,7 @@ class OneformerSeg3DInferencer(Base3DInferencer):
                 o3d_save_path=o3d_save_path,
                 vis_task=vis_task,
             )
-            results.append(points)
+            results.append(self.visualizer.points_colors)
             self.num_visualized_frames += 1
 
         return results
@@ -281,8 +282,11 @@ class OneformerSeg3DInferencer(Base3DInferencer):
         preds = []
         for data in inputs:
             preds.extend(self.forward(data, **forward_kwargs))
+        visualization = self.visualize(
+            ori_inputs, preds,
+            **visualize_kwargs)  # type: ignore  # noqa: E501
         results = self.postprocess(
-            preds, None, return_datasamples, **postprocess_kwargs
+            preds, visualization, return_datasamples, **postprocess_kwargs
         )
 
         return results

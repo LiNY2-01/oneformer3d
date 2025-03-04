@@ -23,7 +23,7 @@ def parse_args():
     parser.add_argument(
         '--img-out-dir',
         type=str,
-        default='outputs',
+        default='',
         help='Output directory of prediction and visualization results.')
     parser.add_argument(
         '--show',
@@ -49,7 +49,7 @@ def parse_args():
         ],
         help='Determine the visualization method depending on the task.'
     )
-    
+
     call_args = vars(parser.parse_args())
 
     call_args['inputs'] = dict(points=call_args.pop('pcd'))
@@ -58,7 +58,6 @@ def parse_args():
     init_args = {}
     for init_kw in init_kws:
         init_args[init_kw] = call_args.pop(init_kw)
-    
 
     # NOTE: If your operating environment does not have a display device,
     # (e.g. a remote server), you can save the predictions and visualize
@@ -69,6 +68,7 @@ def parse_args():
             logger='current',
             level=logging.WARNING)
         call_args['show'] = False
+    call_args["return_vis"] = True
 
     return init_args, call_args
 

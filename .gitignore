@@ -10,3 +10,4 @@ __pycache__/
 *.pcd
 *.bin
 lxdata/
+/outputs

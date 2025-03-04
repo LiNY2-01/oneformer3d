@@ -141,7 +141,7 @@ class Det3dInstanceVisualizer(Det3DLocalVisualizer):
         pts_color = palette[pts_sem_seg]
         seg_color = np.concatenate([points[:, :3], pts_color], axis=1)
 
-        self.set_points(points, pcd_mode=2, vis_mode='add')
+        self.set_points(points, pcd_mode=2, vis_mode='add', mode="xyzrgb")
         self.draw_seg_mask(seg_color)
 
     @master_only
@@ -387,7 +387,7 @@ class Det3dInstanceVisualizer(Det3DLocalVisualizer):
         # self.o3d_vis.add_geometry(mesh_frame)
         seg_points = copy.deepcopy(seg_mask_colors)
         seg_points[:, 0] += offset
-        self.set_points(seg_points, pcd_mode=2, vis_mode='add', mode='xyzrgb')
+        self.set_points(seg_points, pcd_mode=2, vis_mode='replace', mode='xyzrgb')
 
 
         
